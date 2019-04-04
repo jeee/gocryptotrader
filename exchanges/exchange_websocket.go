@@ -271,8 +271,9 @@ func (w *Websocket) SetWsStatusAndConnection(enabled bool) error {
 		if w.init {
 			return nil
 		}
-		return fmt.Errorf("exchange_websocket.go error - already set as %t",
-			enabled)
+		return nil
+		//return fmt.Errorf("exchange_websocket.go error - already set as %t",
+		//	enabled)
 	}
 
 	w.enabled = enabled

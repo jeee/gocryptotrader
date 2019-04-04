@@ -13,6 +13,8 @@ import (
 	"github.com/thrasher-/gocryptotrader/exchanges/stats"
 	"github.com/thrasher-/gocryptotrader/exchanges/ticker"
 	log "github.com/thrasher-/gocryptotrader/logger"
+    
+    "github.com/thrasher-/gocryptotrader/alerter"
 )
 
 func printCurrencyFormat(price float64) string {
@@ -422,6 +424,14 @@ func WebsocketDataHandler(ws *exchange.Websocket, verbose bool) {
 				if verbose {
 					log.Infoln("Websocket Ticker Updated:   ", d)
 				}
+				
+				// Send the ticker to the alerter
+				wsTicker, ok := data.(exchange.TickerData)
+                if ok{
+                    alerter.GetChannel().Channel <- wsTicker
+                }
+				
+				
 			case exchange.KlineData:
 				// Kline data
 				if verbose {

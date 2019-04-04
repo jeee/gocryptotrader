@@ -110,6 +110,7 @@ type Config struct {
 	Webserver         WebserverConfig      `json:"webserver"`
 	Exchanges         []ExchangeConfig     `json:"exchanges"`
 	BankAccounts      []BankAccount        `json:"bankAccounts"`
+	Alerter           AlerterConfig        `json:"alerter"`
 
 	// Deprecated config settings, will be removed at a future date
 	CurrencyPairFormat  *CurrencyPairFormatConfig `json:"currencyPairFormat,omitempty"`
@@ -174,6 +175,26 @@ type BankTransaction struct {
 	TransactionNumber   string `json:"transactionNumber"`
 	PaymentInstructions string `json:"paymentInstructions"`
 }
+
+type AlerterConfig struct {
+    Alerts         []Alert  `json:"alerts"`
+    Template       string
+    TemplateRepeat string
+    AlertFile      string
+}
+
+type Alert struct {
+    Exchange string  `json:"exchange"`
+    Pair     string  `json:"pair"`
+    Value    float64 `json:"value"`
+    Type     string  `json:"type"`
+    State    string  `json:"state"`
+}
+
+func (a *Alert) SetRunning(){
+    a.State = "running"
+}
+
 
 // CurrencyConfig holds all the information needed for currency related manipulation
 type CurrencyConfig struct {
@@ -1327,6 +1348,7 @@ func (c *Config) UpdateConfig(configPath string, newCfg *Config) error {
 	c.Communications = newCfg.Communications
 	c.Webserver = newCfg.Webserver
 	c.Exchanges = newCfg.Exchanges
+	c.Alerter = newCfg.Alerter
 
 	err = c.SaveConfig(configPath)
 	if err != nil {

@@ -18,6 +18,8 @@ import (
 	exchange "github.com/thrasher-/gocryptotrader/exchanges"
 	log "github.com/thrasher-/gocryptotrader/logger"
 	"github.com/thrasher-/gocryptotrader/portfolio"
+    
+    "github.com/thrasher-/gocryptotrader/alerter"
 )
 
 // Bot contains configuration, portfolio, exchange & ticker data and is the
@@ -179,6 +181,7 @@ func main() {
 
 	go portfolio.StartPortfolioWatcher()
 
+    go alerter.AlerterRoutine(bot.config)
 	go TickerUpdaterRoutine()
 	go OrderbookUpdaterRoutine()
 	go WebsocketRoutine(*verbosity)

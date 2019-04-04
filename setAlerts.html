@@ -1,0 +1,625 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+   <meta charset="UTF-8">
+   <style>
+   body {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    }
+    
+   .glyphicon-arrow-up:before {
+    content: "up";
+}
+   .glyphicon-arrow-down:before {
+    content: "down";
+}
+
+.glyphicon-remove:before {
+    content: "\e014";
+}
+
+.table-remove {
+    color: #700;
+    cursor: pointer;
+}
+.table-remove:hover {
+    color: #f00;
+}
+
+.table-up:hover, .table-down:hover {
+    color: #00f;
+}
+
+.glyphicon-plus:before {
+    content: "\2b";
+}
+
+select[name=pair] {
+  width: 7em;
+}
+select[name=exchange] {
+  width: 8em;
+}
+input[name=value] {
+  width: 5em;
+}
+
+.glyphicon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.table-up, .table-down {
+    color: #007;
+    cursor: pointer;
+}
+
+:before, :after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.table-add {
+    color: #070;
+    cursor: pointer;
+    position: absolute;
+    top: 8px;
+    right: 0;
+}
+.table-add:hover {
+    color: #0b0;
+}
+
+.glyphicon {
+    font-size: 20px;
+}
+body { 
+    zoom: 2.1; 
+    -moz-transform: scale(3); 
+    -moz-transform-origin: 0 0;
+} 
+   </style>
+     <link href='https://fonts.googleapis.com/css?family=Lato:300,400,400italic,700,700italic' rel='stylesheet'>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+   
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script type = "text/javascript">
+
+websocketURL = "ws://127.0.0.1:9050/ws";
+
+function SHA256(s){
+    var chrsz   = 8;
+    var hexcase = 0;
+
+    function safe_add (x, y) {
+        var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+        var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+        return (msw << 16) | (lsw & 0xFFFF);
+    }
+
+    function S (X, n) { return ( X >>> n ) | (X << (32 - n)); }
+
+    function R (X, n) { return ( X >>> n ); }
+
+    function Ch(x, y, z) { return ((x & y) ^ ((~x) & z)); }
+
+    function Maj(x, y, z) { return ((x & y) ^ (x & z) ^ (y & z)); }
+
+    function Sigma0256(x) { return (S(x, 2) ^ S(x, 13) ^ S(x, 22)); }
+
+    function Sigma1256(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
+
+    function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
+
+    function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
+
+    function core_sha256 (m, l) {
+        var K = new Array(0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174, 0xE49B69C1, 0xEFBE4786, 0xFC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA, 0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x6CA6351, 0x14292967, 0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85, 0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070, 0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3, 0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2);
+        var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
+        var W = new Array(64);
+        var a, b, c, d, e, f, g, h, i, j;
+        var T1, T2;
+        m[l >> 5] |= 0x80 << (24 - l % 32);
+        m[((l + 64 >> 9) << 4) + 15] = l;
+        for ( var i = 0; i<m.length; i+=16 ) {
+            a = HASH[0];
+            b = HASH[1];
+            c = HASH[2];
+            d = HASH[3];
+            e = HASH[4];
+            f = HASH[5];
+            g = HASH[6];
+            h = HASH[7];
+            for ( var j = 0; j<64; j++) {
+                if (j < 16) W[j] = m[j + i];
+                else W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+                T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
+                T2 = safe_add(Sigma0256(a), Maj(a, b, c));
+                h = g;
+                g = f;
+                f = e;
+                e = safe_add(d, T1);
+                d = c;
+                c = b;
+                b = a;
+                a = safe_add(T1, T2);
+            }
+            HASH[0] = safe_add(a, HASH[0]);
+            HASH[1] = safe_add(b, HASH[1]);
+            HASH[2] = safe_add(c, HASH[2]);
+            HASH[3] = safe_add(d, HASH[3]);
+            HASH[4] = safe_add(e, HASH[4]);
+            HASH[5] = safe_add(f, HASH[5]);
+            HASH[6] = safe_add(g, HASH[6]);
+            HASH[7] = safe_add(h, HASH[7]);
+        }
+        return HASH;
+    }
+
+    function str2binb (str) {
+        var bin = Array();
+        var mask = (1 << chrsz) - 1;
+        for(var i = 0; i < str.length * chrsz; i += chrsz) {
+            bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i%32);
+        }
+        return bin;
+    }
+
+    function Utf8Encode(string) {
+        string = string.replace(/\r\n/g,"\n");
+        var utftext = "";
+        for (var n = 0; n < string.length; n++) {
+            var c = string.charCodeAt(n);
+            if (c < 128) {
+                utftext += String.fromCharCode(c);
+            }
+            else if((c > 127) && (c < 2048)) {
+                utftext += String.fromCharCode((c >> 6) | 192);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+            else {
+                utftext += String.fromCharCode((c >> 12) | 224);
+                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+        }
+        return utftext;
+    }
+
+    function binb2hex (binarray) {
+        var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+        var str = "";
+        for(var i = 0; i < binarray.length * 4; i++) {
+            str += hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8+4)) & 0xF) +
+            hex_tab.charAt((binarray[i>>2] >> ((3 - i%4)*8  )) & 0xF);
+        }
+        return str;
+    }
+    s = Utf8Encode(s);
+    return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
+}     
+
+function ConnectWebSocket()
+{
+  if ("WebSocket" in window) {
+    // Let us open a web socket
+    ws = new WebSocket(websocketURL);
+    
+    ws.onopen = function() {
+      writeToScreen('<span style="color: green;">O</span> ');
+      var o = Object()
+      o.username = "admin"
+      o.password = SHA256("Password")
+    
+      ws.send(JSON.stringify({
+        event: "auth",
+        data: o
+      }));
+    };
+
+  } else {
+    // The browser doesn't support WebSocket
+    writeToScreen('<span style="color: red;">"WebSocket NOT supported by your Browser!</span> ');
+  }
+}
+     
+function init()
+{
+  output = document.getElementById("output");
+}
+  
+function writeToScreen(message)
+{
+  var pre = document.createElement("div");
+  pre.style.wordWrap = "break-word";
+  pre.innerHTML = message;
+  
+  output.innerHTML=message+output.innerHTML;
+}
+  
+function addTableRow(a, tb)
+{
+  var tr = document.createElement("tr");
+  
+  headers = ['exchange','pair', 'type',  'value', 'state'];
+  for (j = 0; j < headers.length; ++j)
+  {
+    var item = headers[j];
+    var value = a[headers[j]];
+    
+    var td = document.createElement("td");
+    if(headers[j] == 'value')
+    {
+      var inp = document.createElement("input"); //input element, text
+      inp.setAttribute('type',"text");
+      inp.setAttribute('name',"value");
+      inp.setAttribute('value',a[headers[j]]);
+      td.appendChild(inp);
+    } else if (headers[j] == 'exchange')
+    {
+      var selectList = document.createElement("select"); //select element
+      selectList.setAttribute('name',"exchange");
+      selectList.setAttribute('class',"exchange");
+      //Create and append the options
+      exchange_list = Object.keys(exchanges);
+      for (var k = 0; k < exchange_list.length; ++k)
+      {
+          var option = document.createElement("option");
+          option.value = exchange_list[k];
+          option.text  = exchange_list[k];
+          if( exchange_list[k] == value )
+          {
+            option.setAttribute('selected', 'selected');
+          }
+          selectList.appendChild(option);
+      }
+      td.appendChild(selectList);
+    } else if (headers[j] == 'pair')
+    {
+      var selectList = document.createElement("select"); //select element
+      selectList.setAttribute('name',"pair");
+      
+      //Create and append the options
+      if (a['exchange'] in exchanges)
+      {
+        for (var l = 0; l < exchanges[a['exchange']].length; ++l)
+        {
+            var option = document.createElement("option");
+            option.value = exchanges[a['exchange']][l];
+            option.text  = exchanges[a['exchange']][l];
+            if( exchanges[a['exchange']][l] == value )
+            {
+              option.setAttribute('selected', 'selected');
+            }
+            selectList.appendChild(option);
+        }
+      }
+      td.appendChild(selectList);
+    } else if (headers[j] == 'state')
+    {
+      states = ['active', 'inactive', 'completed', 'running'];
+      var selectList = document.createElement("select"); //select element
+      selectList.setAttribute('name',"state");
+      for (var ls = 0; ls < states.length; ++ls)
+        {
+            var option = document.createElement("option");
+            option.value = states[ls];
+            option.text  = states[ls];
+            if( states[ls] == value.toLowerCase() )
+            {
+              option.setAttribute('selected', 'selected');
+            }
+            selectList.appendChild(option);
+        }
+      td.appendChild(selectList);
+    }  else if (headers[j] == 'type')
+    {
+      types = [['GREATER', '>'], ['LESS', '<']];
+      var selectList = document.createElement("select"); //select element
+      selectList.setAttribute('name',"type");
+      for (var ls = 0; ls < types.length; ++ls)
+        {
+            var option = document.createElement("option");
+            option.value = types[ls][0];
+            option.text  = types[ls][1];
+            
+            if( types[ls][0].toLowerCase() == value.toLowerCase() )
+            {
+              //option.selected;
+              option.setAttribute('selected', 'selected');
+            }
+            selectList.appendChild(option);
+        }
+      td.appendChild(selectList);
+    } else
+    {
+      var cellText = document.createTextNode(a[headers[j]]);
+      td.appendChild(cellText);
+    }
+    tr.appendChild(td);
+  }
+  var td = document.createElement("td");
+  td.innerHTML = '<td><span class="table-up glyphicon glyphicon-arrow-up"></span><span class="table-down glyphicon glyphicon-arrow-down"></span><span class="table-remove glyphicon glyphicon-remove"></span></td>'
+  tr.appendChild(td);
+  tb.appendChild(tr);
+}
+
+const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
+
+function GetAlertTable() {
+            
+  if ("WebSocket" in window) {
+    // Let us open a web socket
+    var ws = new WebSocket(websocketURL);
+    
+    ws.onopen = function() {
+      writeToScreen('<span style="color: green;">O</span> ');
+      ws.onmessage = function (evt) { 
+        var received_event = JSON.parse(evt.data).event;
+
+        if( received_event == 'auth' && JSON.parse(evt.data).data == 'OK' )
+        {
+            // Web Socket is connected and authenticated, requesting config
+            ws.send(JSON.stringify({
+              event: "GetConfig"
+            }));
+
+        } else if( received_event == 'GetConfig' )
+        {
+          config = JSON.parse(evt.data)
+          //define exchanges
+          exchanges = {};
+          for (i = 0; i < config.data.exchanges.length; ++i)
+          {
+            e = config.data.exchanges[i];
+            exchanges[e.name] = e.enabledPairs.replace(/-/g,'').split(',');
+          }
+          
+          var alerts = [];
+          if(config.data.alerter && config.data.alerter.alerts )
+          {
+            alerts = config.data.alerter.alerts
+          }
+          
+          var f = document.createElement("form");
+          var t = document.createElement("table");
+          t.setAttribute('name', 'table');
+          var tb = document.createElement("tbody");
+          
+          f.appendChild(t);
+          t.appendChild(tb);
+          
+          
+          for (i = 0; i < alerts.length; ++i)
+          {
+            a = alerts[i];
+            addTableRow(a,tb);
+          }
+          f.setAttribute('method',"post");
+          
+          var s = document.createElement("input"); //input element, Submit button
+          s.setAttribute('type',"button");
+          s.setAttribute('value',"Submit");
+          s.setAttribute('onCLick', "javascript: onSubmit()");
+
+          f.appendChild(s);
+
+          var sr = document.createElement("input"); //input element, Submit button
+          sr.setAttribute('type',"button");
+          sr.setAttribute('value',"Stop running");
+          sr.setAttribute('onCLick', "javascript: stopRunning()");
+
+          f.appendChild(sr);
+
+          var sp = document.createElement("span");
+          sp.setAttribute('class', 'table-add glyphicon glyphicon-plus');
+          f.appendChild(sp);
+
+          //and some more input elements here
+          //and dont forget to add a submit button
+          document.getElementsByTagName('body')[0].appendChild(f);
+
+          setClickEvents();
+          
+          $('.table-add').click(function () {
+            a = {exchange:Object.keys(exchanges)[0], pair:"", value:0.0, state:"", type:""};
+            addTableRow(a,document.getElementsByTagName("table")[0].tBodies.item(0));
+            setClickEvents();
+          });
+
+          ws.close(); 
+        } //else
+//         {
+//         var received_event = JSON.parse(evt.data).Event;
+//       
+//         if( ['orderbook_update', 'ticker_update'].indexOf(received_event) >= 0)
+//         {
+//           var xx;
+//         
+//         } else
+//           var xx;
+//         }  
+      }
+      
+      ws.onclose = function() { 
+        // websocket is closed.
+        writeToScreen('<span style="color: red;">C</span> ');
+      };
+      var o = Object()
+      o.username = "admin"
+      o.password = SHA256("Password")
+      ws.send(JSON.stringify({
+        event: "auth",
+        data: o
+      }));
+    }
+
+  } else {
+    // The browser doesn't support WebSocket
+      writeToScreen('<div style="color: red;">"WebSocket NOT supported by your Browser!</div> ');
+  }
+};
+
+function setClickEvents() {
+  $('.table-down').click(function () {
+    var $row = $(this).parents('tr');
+    $row.next().after($row.get(0));
+  });
+
+  $('.table-up').click(function () {
+    var $row = $(this).parents('tr');
+    if ($row.index() === 0) return; // Don't go above the header
+    $row.prev().before($row.get(0));
+  });
+
+  $('.table-remove').click(function () {
+    $(this).parents('tr').detach();
+  });
+
+  $('.exchange').change(function () {
+    var $exchange = $(this).find(":selected").text();
+    var $pair = $(this).parents('tr').find("select[name=pair] :selected").text();
+    var $selectList = $(this).parents('tr').find("select[name=pair]");
+    $selectList.empty();
+    //Create and append the options
+    for (var l = 0; l < exchanges[$exchange].length; ++l)
+    {
+        var option = document.createElement("option");
+        option.value = exchanges[$exchange][l];
+        option.text  = exchanges[$exchange][l];
+        if( exchanges[$exchange][l] == $pair )
+        {
+          //option.selected;
+          option.setAttribute('selected', 'selected');
+        }
+        $selectList[0].appendChild(option);
+    }
+  });
+}
+
+async function stopRunning(){
+  var $TABLE = $('table');
+  var $rows = $TABLE.find('tr');
+  if ( $rows.length > 0 )
+  {
+    var cntRunning = $("table select option:selected:contains('running') ");
+    if ( cntRunning.length == 0 )
+    {
+      $('form').remove();
+      GetAlertTable();
+    }
+  
+    $TABLE = $('table');
+    $rows = $TABLE.find('tr');
+    var headers = [];
+    var data = [];
+    
+    cnt=0;
+    while ( $rows.length == 0 )
+    {
+      console.log(cnt);
+      await sleep(100);
+      $TABLE = $('table');
+      $rows = $TABLE.find('tr');
+      if (cnt > 100)
+      {
+        return;
+      }
+      cnt++;
+    }
+    $rows.each(function () {
+      var $td = $(this).find('td');
+      var h = {};
+      
+      // Use the headers from earlier to name our hash keys
+      $td.each(function (i, td) {
+        key = td.firstChild.name
+        value = td.firstChild.value
+        if ( key == 'state' )
+        {
+          if (value.toLowerCase() == 'running')
+          {
+            $(td.firstChild).val('completed');
+          }
+        }
+      });
+    });
+    onSubmit();
+  }
+}
+
+
+function onSubmit()
+{
+  if ("WebSocket" in window) {
+      var $TABLE = $('table');
+      var $rows = $TABLE.find('tr');
+      var headers = [];
+      var data = [];
+  
+  // Turn all existing rows into a loopable array
+    $rows.each(function () {
+      var $td = $(this).find('td');
+      var h = {};
+      
+      // Use the headers from earlier to name our hash keys
+      $td.each(function (i, td) {
+        key = td.firstChild.name
+        value = td.firstChild.value
+        if ( key != undefined)
+        {
+          if ( key == 'value' )
+          {
+            h[key] = parseFloat(value);
+          } else
+            h[key] = value;
+        }
+      });
+      data.push(h);
+      
+      
+    });
+
+    var ws = new WebSocket(websocketURL);
+      
+    ws.onopen = function() {
+      writeToScreen('<span style="color: green;">O</span> ');
+      var o = Object()
+      o.username = "admin"
+      o.password = SHA256("Password")
+    
+      ws.send(JSON.stringify({
+        event: "auth",
+        data: o
+      }));
+      config.data.alerter.alerts = data;
+      ws.send(JSON.stringify({
+        event: "SaveConfig",
+        data: config.data
+      }));
+      ws.close();
+    }
+  }
+  $('form').remove();
+  GetAlertTable();
+}
+      </script>
+   </head>
+   
+   <body  onload="GetAlertTable()">
+      <div id="output"></div>
+   </body>
+</html> 

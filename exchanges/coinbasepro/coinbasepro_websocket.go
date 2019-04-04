@@ -159,7 +159,7 @@ func (c *CoinbasePro) WsHandleData() {
 					Pair:      currency.NewPairFromString(ticker.ProductID),
 					AssetType: "SPOT",
 					Exchange:  c.GetName(),
-					OpenPrice: ticker.Price,
+					ClosePrice: ticker.Price,
 					HighPrice: ticker.High24H,
 					LowPrice:  ticker.Low24H,
 					Quantity:  ticker.Volume24H,
